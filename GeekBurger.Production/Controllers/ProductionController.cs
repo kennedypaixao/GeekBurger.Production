@@ -21,7 +21,7 @@ namespace GeekBurger.Production.Controllers
 			AreasList.Add(new Areas { ProductionId = 1114, Restrictions = new List<string> { }, On = true });
 		}
 
-		[HttpGet]
+		[HttpGet("/areas")]
 		public IActionResult GetAreas()
 		{
 			if (AreasList.Count() == 0)
