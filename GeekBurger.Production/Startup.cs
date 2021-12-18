@@ -70,9 +70,8 @@ namespace GeekBurger.Production
 			var communicationService = new CommunicationService(config.ConnectionString);
 			services.AddTransient<ICommunicationService>((e) => communicationService);
 
-			//communicationService.ReceiveMessages("orderchanged",null, null).GetAwaiter().GetResult();
-
 			new ProductionAreaChangedEvent(communicationService);
+			new OrderEvents(communicationService);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

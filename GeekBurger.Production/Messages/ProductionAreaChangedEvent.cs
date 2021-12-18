@@ -1,5 +1,4 @@
 ﻿using GeekBurger.Production.Contract;
-using GeekBurger.Production.Messages.Interface;
 using GeekBurger.Production.Services.Interface;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace GeekBurger.Production.Messages
 {
-	public class ProductionAreaChangedEvent: IProductionAreaChangedEvent
+	public class ProductionAreaChangedEvent
 	{
 		private IEnumerable<Areas> AreasList;
 		private ICommunicationService _commService;

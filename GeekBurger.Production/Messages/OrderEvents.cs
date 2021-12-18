@@ -1,5 +1,6 @@
 ﻿using GeekBurger.Production.Services.Interface;
 using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,13 @@ using System.Threading.Tasks;
 
 namespace GeekBurger.Production.Messages
 {
+	public class OrderChanged
+	{
+		public int OrderId { get; set; }
+		public string StoreName { get; set; }
+		public string State { get; set; }
+	}
+
 	public class OrderEvents
 	{
 		private ICommunicationService _commService;
@@ -17,7 +25,7 @@ namespace GeekBurger.Production.Messages
 		{
 			_commService = commService;
 			InitNewOrder();
-			InitNewOrder();
+			InitOrderChanged();
 		}
 
 		private void InitNewOrder()
@@ -36,13 +44,31 @@ namespace GeekBurger.Production.Messages
 
 		private Task _newOrderMessageHandler(Message message, CancellationToken arg2)
 		{
-			var prodChangesString = Encoding.UTF8.GetString(message.Body);
+			var value = Encoding.UTF8.GetString(message.Body);
+			var obj = JsonConvert.DeserializeObject<GeekBurguer.Contracts.OrderModel>(value);
+
 			return Task.CompletedTask;
 		}
 
 		private Task _orderChangedMessageHandler(Message message, CancellationToken arg2)
 		{
-			var prodChangesString = Encoding.UTF8.GetString(message.Body);
+			try
+			{
+				var value = Encoding.UTF8.GetString(message.Body);
+				var obj = JsonConvert.DeserializeObject<OrderChanged>(value);
+
+				if (obj.State == "Paid")
+				{
+					obj.State = "Finished";
+					string messageBody = JsonConvert.SerializeObject(obj);
+					_commService.SendMessageAsync("OrderChanged", messageBody);
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine($"Error _orderChangedMessageHandler: {e}");
+			}
+
 			return Task.CompletedTask;
 		}
 
