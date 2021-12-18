@@ -1,36 +1,35 @@
 ﻿using GeekBurger.Production.Contract;
+using GeekBurger.Production.Messages.Interface;
 using GeekBurger.Production.Services.Interface;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace GeekBurger.Production.Controllers
+namespace GeekBurger.Production.Messages
 {
-	[ApiController]
-	[Route("api/[controller]")]
-	public class ProductionController : Controller
+	public class ProductionAreaChangedEvent: IProductionAreaChangedEvent
 	{
 		private IEnumerable<Areas> AreasList;
 		private ICommunicationService _commService;
 
-		public ProductionController(ICommunicationService commService)
+		public ProductionAreaChangedEvent(ICommunicationService commService)
 		{
 			_commService = commService;
 			AreasList = Areas.Init();
+
+			Init();
 		}
 
-		[HttpGet("/areas")]
-		public IActionResult GetAreas()
+		public Task Init()
 		{
-			if (AreasList.Count() == 0)
-				return NotFound();
-			
-			return Ok(AreasList);
+			string messageBody = JsonConvert.SerializeObject(AreasList);
+			return _commService.SendMessageAsync(messageBody, "ProductionAreaChanged");
 		}
+
 	}
 }
